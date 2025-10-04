@@ -1,0 +1,92 @@
+[
+  {
+    "county": "Nairobi",
+    "date": "2025-01-16",
+    "ndvi": 0.42,
+    "anomaly": null,
+    "rainfall": 25,
+    "lat": -1.2921,
+    "lon": 36.8219
+  },
+  {
+    "county": "Nairobi",
+    "date": "2025-03-03",
+    "ndvi": 0.58,
+    "anomaly": null,
+    "rainfall": 80,
+    "lat": -1.2921,
+    "lon": 36.8219
+  },
+  {
+    "county": "Kisumu",
+    "date": "2025-02-01",
+    "ndvi": 0.65,
+    "anomaly": "hyacinth",
+    "rainfall": 120,
+    "lat": -0.0917,
+    "lon": 34.768
+  },
+  {
+    "county": "Nakuru",
+    "date": "2025-02-16",
+    "ndvi": 0.48,
+    "anomaly": null,
+    "rainfall": 60,
+    "lat": -0.3031,
+    "lon": 36.08
+  },
+  {
+    "county": "Makueni",
+    "date": "2025-04-01",
+    "ndvi": 0.33,
+    "anomaly": "drought",
+    "rainfall": 10,
+    "lat": -1.8188,
+    "lon": 37.6524
+  },
+  {
+    "county": "Kisii",
+    "date": "2025-03-16",
+    "ndvi": 0.67,
+    "anomaly": null,
+    "rainfall": 140,
+    "lat": -0.6775,
+    "lon": 34.7719
+  },
+  {
+    "county": "Homa Bay",
+    "date": "2025-01-16",
+    "ndvi": 0.59,
+    "anomaly": "hyacinth",
+    "rainfall": 110,
+    "lat": -0.5286,
+    "lon": 34.4577
+  },
+  {
+    "county": "Nyeri",
+    "date": "2025-03-16",
+    "ndvi": 0.53,
+    "anomaly": null,
+    "rainfall": 70,
+    "lat": -0.4167,
+    "lon": 36.95
+  },
+  {
+    "county": "Machakos",
+    "date": "2025-05-01",
+    "ndvi": 0.4,
+    "anomaly": null,
+    "rainfall": 30,
+    "lat": -1.5117,
+    "lon": 37.2633
+  },
+  {
+    "county": "Siaya",
+    "date": "2025-04-16",
+    "ndvi": 0.62,
+    "anomaly": null,
+    "rainfall": 100,
+    "lat": 0.0614,
+    "lon": 34.2885
+  }
+]
