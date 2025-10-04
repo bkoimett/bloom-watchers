@@ -13,7 +13,7 @@ function App() {
 
   return (
     <div className="p-4">
-      <NavBar/>
+      <NavBar />
       {/* <h1 className="text-3xl font-bold mb-4">🌍 Bloom Watchers - Kenya</h1> */}
       <KenyaMap data={data} />
       <div className="mt-6 flex gap-2">
