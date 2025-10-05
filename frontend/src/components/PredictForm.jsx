@@ -1,70 +1,54 @@
-import { useState } from "react";
-import { fetchPrediction } from "../services/api";
+// frontend/src/components/PredictForm.jsx
+import React, { useState } from "react";
+import { requestPrediction } from "../services/api";
 
-export default function PredictForm() {
-  const [city, setCity] = useState("");
+export default function PredictForm({ defaultCity = "", onResult }) {
+  const [city, setCity] = useState(defaultCity);
   const [date, setDate] = useState("");
-  const [result, setResult] = useState(null);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const handleSubmit = async (e) => {
+  const submit = async (e) => {
     e.preventDefault();
     setError(null);
-    setResult(null);
-
+    if (!city || !date) return setError("Please pick city and date");
+    setLoading(true);
     try {
-      const data = await fetchPrediction(city, date);
-      setResult(data);
+      const res = await requestPrediction(city, date);
+      setLoading(false);
+      onResult && onResult(res); // pass up to App
     } catch (err) {
+      setLoading(false);
       setError(err.message);
     }
   };
 
   return (
-    <div className="p-4 bg-base-100 rounded-lg shadow-lg">
-      <h2 className="text-xl font-semibold mb-4 text-primary">Predict NDVI</h2>
-      <form onSubmit={handleSubmit} className="space-y-2">
+    <div className="p-3 bg-base-100 rounded shadow-sm">
+      <form onSubmit={submit} className="space-y-2">
         <input
           type="text"
-          placeholder="City (e.g., Kisumu)"
           className="input input-bordered w-full"
+          placeholder="City (e.g., Kisumu)"
           value={city}
           onChange={(e) => setCity(e.target.value)}
-          required
         />
         <input
           type="date"
           className="input input-bordered w-full"
           value={date}
           onChange={(e) => setDate(e.target.value)}
-          required
         />
-        <button type="submit" className="btn btn-primary w-full">
-          Predict
+        <button
+          className="btn btn-primary w-full"
+          type="submit"
+          disabled={loading}
+        >
+          {loading ? "Predicting..." : "Get prediction"}
         </button>
       </form>
 
-      {error && <p className="text-error mt-3">{error}</p>}
-
-      {result && (
-        <div className="mt-4 p-3 bg-base-200 rounded-lg">
-          <p>
-            <strong>City:</strong> {result.city}
-          </p>
-          <p>
-            <strong>Date:</strong> {result.date}
-          </p>
-          <p>
-            <strong>NDVI:</strong> {result.predicted_ndvi.toFixed(3)}
-          </p>
-          <p>
-            <strong>Interpretation:</strong> {result.interpretation}
-          </p>
-          <p>
-            <strong>Anomaly:</strong> {result.anomaly ? "⚠️ Yes" : "✅ No"}
-          </p>
-        </div>
-      )}
+      {error && <p className="text-error mt-2">{error}</p>}
     </div>
   );
 }

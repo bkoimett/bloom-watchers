@@ -17,7 +17,11 @@ function computeStats(records) {
   return { avg: avg, anomalies };
 }
 
-export default function InfoPanel({ records = [], predictions = [] }) {
+export default function InfoPanel({
+  records = [],
+  predictions = [],
+  prediction = null,
+}) {
   const stats = computeStats(records);
 
   // build trend data grouped by date (average)
@@ -34,6 +38,24 @@ export default function InfoPanel({ records = [], predictions = [] }) {
 
   return (
     <div>
+      {/* --- Single Prediction Display --- */}
+      {prediction && (
+        <div className="card p-3 mb-3 bg-base-200">
+          <div className="text-sm text-gray-600">Prediction</div>
+          <div className="text-lg font-semibold">
+            {prediction.city} — {new Date(prediction.date).toLocaleDateString()}
+          </div>
+          <div>
+            NDVI: <b>{prediction.predicted_ndvi.toFixed(3)}</b>
+          </div>
+          <div className="text-xs">{prediction.interpretation}</div>
+          <div>
+            {prediction.anomaly ? "⚠️ Anomaly detected" : "✅ No anomaly"}
+          </div>
+        </div>
+      )}
+
+      {/* --- Average NDVI and Anomalies --- */}
       <div className="card bg-base-100 p-3 mb-3">
         <div className="flex justify-between">
           <div>
@@ -49,6 +71,7 @@ export default function InfoPanel({ records = [], predictions = [] }) {
         </div>
       </div>
 
+      {/* --- NDVI Trend Chart --- */}
       <div className="mb-4">
         <h3 className="font-semibold mb-2">NDVI trend</h3>
         {trend.length ? (
@@ -79,6 +102,7 @@ export default function InfoPanel({ records = [], predictions = [] }) {
         )}
       </div>
 
+      {/* --- Predictions List --- */}
       <div className="mb-4">
         <h3 className="font-semibold mb-2">Predictions</h3>
         {predictions.length ? (
@@ -101,6 +125,7 @@ export default function InfoPanel({ records = [], predictions = [] }) {
         )}
       </div>
 
+      {/* --- Anomalies --- */}
       <div>
         <h3 className="font-semibold mb-2">Anomalies</h3>
         {records.filter((r) => r.anomaly).length ? (
