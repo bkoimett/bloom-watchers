@@ -34,10 +34,9 @@ async function predictCounty(county) {
   return r.json();
 }
 
-// ====== HELPER FUNCTIONS ======
+// ====== HELPERS ======
 const ndviToColor = (v) =>
   v >= 0.6 ? "#16a34a" : v >= 0.4 ? "#f59e0b" : "#dc2626";
-
 const ndviToRadius = (v) => 4 + Math.max(0, Math.min(1, v)) * 14;
 
 // ====== MAP COMPONENT ======
@@ -51,32 +50,32 @@ function KenyaMap({ data, predictions, showAnomalies }) {
       >
         <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
 
-        {/* Bloom Markers */}
-        {data.map((d, i) =>
-          d.lat && d.lon ? (
-            <CircleMarker
-              key={i}
-              center={[d.lat, d.lon]}
-              radius={ndviToRadius(d.ndvi)}
-              pathOptions={{
-                color: ndviToColor(d.ndvi),
-                fillOpacity: 0.6,
-              }}
-            >
-              <Tooltip>
-                <div>
-                  <b>{d.county}</b> <br />
-                  {new Date(d.date).toLocaleDateString()} <br />
-                  NDVI: {d.ndvi.toFixed(2)} <br />
-                  Rainfall: {d.rainfall ?? "—"} <br />
-                  Anomaly: {d.anomaly ?? "None"}
-                </div>
-              </Tooltip>
-            </CircleMarker>
-          ) : null
+        {data.map(
+          (d, i) =>
+            d.lat &&
+            d.lon && (
+              <CircleMarker
+                key={i}
+                center={[d.lat, d.lon]}
+                radius={ndviToRadius(d.ndvi)}
+                pathOptions={{
+                  color: ndviToColor(d.ndvi),
+                  fillOpacity: 0.6,
+                }}
+              >
+                <Tooltip>
+                  <div>
+                    <b>{d.county}</b> <br />
+                    {new Date(d.date).toLocaleDateString()} <br />
+                    NDVI: {d.ndvi.toFixed(2)} <br />
+                    Rainfall: {d.rainfall ?? "—"} <br />
+                    Anomaly: {d.anomaly ?? "None"}
+                  </div>
+                </Tooltip>
+              </CircleMarker>
+            )
         )}
 
-        {/* Prediction Marker */}
         {predictions?.latitude && predictions?.longitude && (
           <CircleMarker
             center={[predictions.latitude, predictions.longitude]}
@@ -130,7 +129,7 @@ export default function App() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // Load all data
+  // Load data
   useEffect(() => {
     (async () => {
       try {
@@ -180,7 +179,7 @@ export default function App() {
         </p>
       </header>
 
-      {/* MAIN CONTENT AREA */}
+      {/* MAIN CONTENT */}
       <div className="flex flex-1 overflow-hidden">
         {/* LEFT: MAP */}
         <div className="relative flex-1">
@@ -191,18 +190,20 @@ export default function App() {
           />
 
           {/* FLOATING BUTTONS */}
-          <div className="absolute top-4 left-4 z-50 flex flex-col gap-3 bg-white/80 p-3 rounded-xl shadow-md">
+          <div className="absolute top-4 left-4 z-50 flex flex-col gap-3 bg-white/90 p-3 rounded-xl shadow-md border border-gray-200">
             <button
               onClick={handleFilter}
               disabled={loading}
-              className="btn btn-accent"
+              className="btn btn-accent w-full"
             >
               🔍 Apply Filters
             </button>
             <button
               onClick={handlePredict}
-              disabled={loading || !county}
-              className="btn btn-primary"
+              disabled={loading}
+              className={`btn btn-primary w-full ${
+                !county ? "opacity-70 cursor-not-allowed" : ""
+              }`}
             >
               🔮 Predict
             </button>
@@ -258,6 +259,7 @@ export default function App() {
           <div className="text-sm text-gray-500">
             Records loaded: {data.length}
           </div>
+
           {predictions && (
             <div className="mt-4 text-sm">
               <b>Predicted NDVI:</b> {predictions.predicted_ndvi.toFixed(3)}
