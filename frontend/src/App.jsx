@@ -44,42 +44,55 @@ export default function App() {
     () => Array.from(new Set(allData.map((d) => d.county))).sort(),
     [allData]
   );
-  const years = useMemo(
-    () =>
-      Array.from(
-        new Set(allData.map((d) => new Date(d.date).getFullYear()))
-      ).sort(),
-    [allData]
-  );
+  const years = useMemo(() => {
+    const allYears = Array.from(
+      new Set(allData.map((d) => new Date(d.date).getFullYear()))
+    ).sort((a, b) => a - b);
+
+    return ["All", ...allYears];
+  }, [allData]);
 
   // apply filters (calls backend filter route)
-const applyFilters = async () => {
-  try {
-    setLoading(true);
-    const res = await filterBlooms(selectedCounty, selectedYear);
+  const applyFilters = async () => {
+    try {
+      setLoading(true);
 
-    const normalized = res.map((d) => ({
-      ...d,
-      date: new Date(d.date).toISOString().slice(0, 10),
-      anomaly: d.anomaly ? true : false, // ensure boolean
-    }));
+      let filtered = allData;
 
-    setDisplayData(normalized);
+      // Filter by county if selected
+      if (selectedCounty && selectedCounty !== "All") {
+        filtered = filtered.filter((d) => d.county === selectedCounty);
+      }
 
-    // Update slider dates
-    const uniqueDates = Array.from(new Set(normalized.map((d) => d.date))).sort(
-      (a, b) => new Date(a) - new Date(b)
-    );
+      // Filter by year if selected (and not "All")
+      if (selectedYear && selectedYear !== "All") {
+        filtered = filtered.filter(
+          (d) => new Date(d.date).getFullYear() === Number(selectedYear)
+        );
+      }
 
-    setDates(uniqueDates);
-    setDateIndex(uniqueDates.length - 1); // last date (most recent)
-  } catch (err) {
-    console.error("❌ Filter failed:", err);
-  } finally {
-    setLoading(false);
-  }
-};
+      // Sort & normalize
+      const normalized = filtered.map((d) => ({
+        ...d,
+        date: new Date(d.date).toISOString().slice(0, 10),
+        anomaly: !!d.anomaly,
+      }));
 
+      setDisplayData(normalized);
+
+      // Generate date list for slider
+      const uniqueDates = Array.from(
+        new Set(normalized.map((d) => d.date))
+      ).sort((a, b) => new Date(a) - new Date(b));
+
+      setDates(uniqueDates);
+      setDateIndex(uniqueDates.length - 1); // show latest
+    } catch (err) {
+      console.error("❌ Filter failed:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Predict using backend -> python
   const handlePredict = async (
@@ -125,7 +138,6 @@ const applyFilters = async () => {
             >
               Apply filters
             </button>
-
           </div>
         </div>
 

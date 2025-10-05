@@ -37,7 +37,6 @@ export default function FilterPanel({
           onChange={(e) => setSelectedYear(e.target.value)}
           className="select select-bordered w-full"
         >
-          <option value="">All years</option>
           {years.map((y) => (
             <option key={y} value={y}>
               {y}
