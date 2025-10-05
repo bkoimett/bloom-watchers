@@ -3,8 +3,10 @@ const axios = require("axios");
 const BloomData = require("../models/BloomData");
 const router = express.Router();
 
-const PYTHON_API =
-  process.env.PYTHON_API_URL || "https://my-earth-access.onrender.com";
+const PYTHON_API = (
+  process.env.PYTHON_API_URL ||
+  "https://ndvi-api-production-2c07.up.railway.app"
+).replace(/\/$/, ""); // remove trailing slash
 
 router.post("/", async (req, res) => {
   const { city, date } = req.body || {};
