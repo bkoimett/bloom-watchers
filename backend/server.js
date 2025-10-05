@@ -4,7 +4,19 @@ const cors = require("cors");
 require("dotenv").config();
 
 const app = express();
-app.use(cors());
+app.use(
+  cors({
+    origin: [
+      "http://localhost:5173", // Local development
+      "http://localhost:3000", // Alternative local
+      process.env.FRONTEND_URL, // Production Vercel URL
+      "https://bloom-watchers-frontend.vercel.app", // Hardcode as backup
+    ],
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  })
+);
 app.use(express.json());
 
 const bloomRoutes = require("./routes/blooms");
