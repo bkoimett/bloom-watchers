@@ -1,13 +1,23 @@
-const API_URL = "http://localhost:5000/api";
+// frontend/src/services/api.js
+const API = "/api";
 
 export async function fetchBlooms() {
-  const res = await fetch(`${API_URL}/blooms`);
-  return res.json();
+  const r = await fetch(`${API}/blooms`);
+  return r.json();
 }
 
 export async function filterBlooms(county, year) {
-  const res = await fetch(
-    `${API_URL}/blooms/filter?county=${county}&year=${year}`
-  );
-  return res.json();
+  const params = new URLSearchParams();
+  if (county) params.append("county", county);
+  if (year) params.append("year", year);
+  const r = await fetch(`${API}/blooms?${params.toString()}`);
+  return r.json();
+}
+
+export async function predictCounty(county, months = 6) {
+  const params = new URLSearchParams();
+  if (county) params.append("county", county);
+  params.append("months", months);
+  const r = await fetch(`${API}/predict?${params.toString()}`);
+  return r.json();
 }
