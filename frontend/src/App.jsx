@@ -74,9 +74,7 @@ export default function App() {
   return (
     <div className="h-screen flex">
       <div className="w-2/3 p-4 flex flex-col">
-        <div className="flex justify-between items-center mb-3">
-          <h1 className="text-2xl font-bold">🌍 Bloom Watchers - Kenya</h1>
-        </div>
+
 
         <KenyaMap
           data={visibleRecords}

@@ -281,7 +281,7 @@ export default function App() {
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <div className="bg-green-600 text-white p-4 shadow-lg">
-        <h1 className="text-3xl font-bold">🌸 Kenya Bloom Tracker</h1>
+        <h1 className="text-3xl font-bold">🌸 Gaia Bloom Watchers </h1>
         <p className="text-green-100 mt-1">
           Monitoring algal blooms across Kenya
         </p>
