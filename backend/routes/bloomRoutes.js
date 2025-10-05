@@ -9,20 +9,28 @@ router.get("/", async (req, res) => {
   res.json(data);
 });
 
-// Filter by county + year
+// GET /api/blooms/filter?county=Machakos&year=2025
 router.get("/filter", async (req, res) => {
-  const { county, year } = req.query;
-  const query = {};
-  if (county) query.county = county;
-  if (year)
-    query.date = {
-      $gte: new Date(`${year}-01-01`),
-      $lte: new Date(`${year}-12-31`),
-    };
+  try {
+    const { county, year } = req.query;
+    if (!county || !year)
+      return res.status(400).json({ error: "county and year are required" });
 
-  const data = await BloomData.find(query);
-  res.json(data);
+    const start = new Date(`${year}-01-01`);
+    const end = new Date(`${Number(year) + 1}-01-01`);
+
+    const blooms = await BloomData.find({
+      county,
+      date: { $gte: start, $lt: end },
+    });
+
+    res.json(blooms);
+  } catch (err) {
+    console.error("❌ Filter error:", err.message);
+    res.status(500).json({ error: "Failed to filter bloom data" });
+  }
 });
+
 
 // Add new data (from Python preprocessing or manual insert)
 router.post("/", async (req, res) => {

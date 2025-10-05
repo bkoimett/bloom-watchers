@@ -1,19 +1,19 @@
 import React, { useState } from "react";
 import { requestPrediction } from "../services/api";
 
-export default function PredictForm({ defaultCity = "", onResult }) {
-  const [city, setCity] = useState(defaultCity);
+export default function PredictForm({ defaultCounty = "", onResult }) {
+  const [county, setCounty] = useState(defaultCounty || "");
   const [date, setDate] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
   async function handleSubmit(e) {
     e.preventDefault();
-    if (!city || !date) return alert("Enter both city and date");
+    if (!county || !date) return alert("Enter both county and date");
     setLoading(true);
     setError("");
     try {
-      const res = await requestPrediction(city, date);
+      const res = await requestPrediction(county, date);
       onResult(res); // pass to parent (App)
     } catch (err) {
       setError(err.message);
@@ -25,11 +25,11 @@ export default function PredictForm({ defaultCity = "", onResult }) {
   return (
     <form onSubmit={handleSubmit} className="card bg-base-100 p-3 space-y-2">
       <div>
-        <label className="block text-sm font-medium mb-1">City</label>
+        <label className="block text-sm font-medium mb-1">County</label>
         <input
           type="text"
-          value={city}
-          onChange={(e) => setCity(e.target.value)}
+          value={county}
+          onChange={(e) => setCounty(e.target.value)}
           className="input input-bordered w-full"
           placeholder="e.g., Kisumu"
         />
