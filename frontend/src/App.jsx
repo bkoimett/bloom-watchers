@@ -15,6 +15,7 @@ export default function App() {
   const [dateIndex, setDateIndex] = useState(0);
   const [prediction, setPrediction] = useState(null);
 
+  // Load all bloom data once
   useEffect(() => {
     (async () => {
       const data = await fetchBlooms();
@@ -24,6 +25,7 @@ export default function App() {
       }));
       setAllData(normalized);
       setDisplayData(normalized);
+
       const uniqueDates = Array.from(
         new Set(normalized.map((d) => d.date))
       ).sort((a, b) => new Date(a) - new Date(b));
@@ -32,6 +34,7 @@ export default function App() {
     })();
   }, []);
 
+  // Build list of unique counties & years
   const counties = useMemo(
     () => Array.from(new Set(allData.map((d) => d.county))).sort(),
     [allData]
@@ -44,6 +47,7 @@ export default function App() {
     [allData]
   );
 
+  // Apply filters
   const applyFilters = async () => {
     const res = await filterBlooms(selectedCounty, selectedYear);
     const normalized = res.map((d) => ({
@@ -51,6 +55,7 @@ export default function App() {
       date: new Date(d.date).toISOString().slice(0, 10),
     }));
     setDisplayData(normalized);
+
     const uniqueDates = Array.from(new Set(normalized.map((d) => d.date))).sort(
       (a, b) => new Date(a) - new Date(b)
     );
@@ -58,37 +63,35 @@ export default function App() {
     setDateIndex(0);
   };
 
-  // handle prediction result from PredictForm
+  // Handle prediction result
   const handlePredictionResult = (pred) => {
-    // pred is { city, latitude, longitude, date, predicted_ndvi, interpretation, anomaly }
     setPrediction(pred);
-    // optionally add to a predictions array if you want to store multiple
   };
 
   const currentDate = dates.length ? dates[dateIndex] : null;
-  // show only points matching slider date
   const visibleRecords = currentDate
     ? displayData.filter((d) => d.date === currentDate)
     : displayData;
 
   return (
-    <div className="h-screen flex">
-      <div className="w-2/3 p-4 flex flex-col">
-
+    <div className="h-screen flex flex-wrap">
+      {/* LEFT SIDE: Map and Apply Filters */}
+      <div className="w-full md:w-2/3 p-4 flex flex-col">
+        {/* <div className="flex justify-between items-center mb-3">
+          <h1 className="text-2xl font-bold">🌍 Bloom Watchers - Kenya</h1>
+          <button className="btn btn-primary" onClick={applyFilters}>
+            Apply Filters
+          </button>
+        </div> */}
 
         <KenyaMap
           data={visibleRecords}
           predictions={prediction ? [prediction] : []}
         />
-
-        <div className="mt-3 flex gap-2">
-          <button className="btn btn-primary" onClick={applyFilters}>
-            Apply filters
-          </button>
-        </div>
       </div>
 
-      <div className="w-1/3 p-4 bg-base-200 overflow-auto">
+      {/* RIGHT SIDE: Controls, Prediction, Info */}
+      <div className="w-full md:w-1/3 p-4 bg-base-200 overflow-auto flex flex-col flex-wrap">
         <div className="mb-4">
           <h2 className="text-lg font-semibold">Controls</h2>
           <FilterPanel
@@ -112,7 +115,7 @@ export default function App() {
           />
         </div>
 
-        <div>
+        <div className="flex-1">
           <h2 className="text-lg font-semibold mb-2">Bloom Insights</h2>
           <InfoPanel records={visibleRecords} prediction={prediction} />
         </div>
