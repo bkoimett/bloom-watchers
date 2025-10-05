@@ -4,7 +4,7 @@ import KenyaMap from "./components/KenyaMap";
 import FilterPanel from "./components/FilterPanel";
 import InfoPanel from "./components/InfoPanel";
 import PredictForm from "./components/PredictForm";
-import { fetchBlooms, filterBlooms, requestPrediction } from "./services/api";
+import { fetchBlooms, requestPrediction } from "./services/api";
 
 export default function App() {
   const [allData, setAllData] = useState([]);
@@ -17,7 +17,7 @@ export default function App() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // load all blooms once
+  // Load all data once
   useEffect(() => {
     (async () => {
       try {
@@ -28,9 +28,10 @@ export default function App() {
         }));
         setAllData(normalized);
         setDisplayData(normalized);
-        const uniqueDates = Array.from(
-          new Set(normalized.map((d) => d.date))
-        ).sort((a, b) => new Date(a) - new Date(b));
+
+        const uniqueDates = Array.from(new Set(normalized.map((d) => d.date))).sort(
+          (a, b) => new Date(a) - new Date(b)
+        );
         setDates(uniqueDates);
         setDateIndex(Math.max(0, uniqueDates.length - 1));
       } catch (err) {
@@ -44,34 +45,31 @@ export default function App() {
     () => Array.from(new Set(allData.map((d) => d.county))).sort(),
     [allData]
   );
+
   const years = useMemo(() => {
     const allYears = Array.from(
       new Set(allData.map((d) => new Date(d.date).getFullYear()))
     ).sort((a, b) => a - b);
-
     return ["All", ...allYears];
   }, [allData]);
 
-  // apply filters (calls backend filter route)
+  // Apply filters and update slider
   const applyFilters = async () => {
     try {
       setLoading(true);
 
       let filtered = allData;
 
-      // Filter by county if selected
       if (selectedCounty && selectedCounty !== "All") {
         filtered = filtered.filter((d) => d.county === selectedCounty);
       }
 
-      // Filter by year if selected (and not "All")
       if (selectedYear && selectedYear !== "All") {
         filtered = filtered.filter(
           (d) => new Date(d.date).getFullYear() === Number(selectedYear)
         );
       }
 
-      // Sort & normalize
       const normalized = filtered.map((d) => ({
         ...d,
         date: new Date(d.date).toISOString().slice(0, 10),
@@ -80,13 +78,11 @@ export default function App() {
 
       setDisplayData(normalized);
 
-      // Generate date list for slider
-      const uniqueDates = Array.from(
-        new Set(normalized.map((d) => d.date))
-      ).sort((a, b) => new Date(a) - new Date(b));
-
+      const uniqueDates = Array.from(new Set(normalized.map((d) => d.date))).sort(
+        (a, b) => new Date(a) - new Date(b)
+      );
       setDates(uniqueDates);
-      setDateIndex(uniqueDates.length - 1); // show latest
+      setDateIndex(uniqueDates.length - 1);
     } catch (err) {
       console.error("❌ Filter failed:", err);
     } finally {
@@ -94,7 +90,7 @@ export default function App() {
     }
   };
 
-  // Predict using backend -> python
+  // Predict using backend
   const handlePredict = async (
     countyToPredict = selectedCounty,
     dateToPredict = null
@@ -105,10 +101,8 @@ export default function App() {
     }
     try {
       setLoading(true);
-      // default date: use current slider date or today
       const date =
-        dateToPredict ??
-        (dates[dateIndex] || new Date().toISOString().slice(0, 10));
+        dateToPredict ?? dates[dateIndex] ?? new Date().toISOString().slice(0, 10);
       const res = await requestPrediction(countyToPredict, date);
       setPrediction(res);
     } catch (err) {
@@ -126,21 +120,11 @@ export default function App() {
 
   return (
     <div className="h-screen flex flex-wrap">
-      {/* LEFT: map */}
+      {/* LEFT: map + slider + filters */}
       <div className="w-full md:w-2/3 p-4 flex flex-col">
-        <div className="flex justify-between items-center mb-3">
-          <h1 className="text-2xl font-bold">🌍 Bloom Watchers - Kenya</h1>
-          <div>
-            <button
-              className="btn btn-primary mr-2"
-              onClick={applyFilters}
-              disabled={loading}
-            >
-              Apply filters
-            </button>
-          </div>
-        </div>
+        <h1 className="text-2xl font-bold mb-3">🌍 Bloom Watchers - Kenya</h1>
 
+        {/* Map */}
         <div className="flex-1 border rounded-lg overflow-hidden">
           <KenyaMap
             data={visibleRecords}
@@ -149,27 +133,50 @@ export default function App() {
           />
         </div>
 
-        {/* Slider */}
-        <div className="mt-3">
-          <FilterPanel
-            counties={counties}
-            years={years}
-            selectedCounty={selectedCounty}
-            setSelectedCounty={setSelectedCounty}
-            selectedYear={selectedYear}
-            setSelectedYear={setSelectedYear}
-            dates={dates}
-            dateIndex={dateIndex}
-            setDateIndex={setDateIndex}
-            compactSlider={true}
-          />
+        {/* Slider below map */}
+        <div className="mt-4">
+          {dates.length > 0 && (
+            <div className="mb-4">
+              <label className="block text-sm mb-1 font-semibold">
+                Date: {dates[dateIndex]}
+              </label>
+              <input
+                type="range"
+                min="0"
+                max={dates.length - 1}
+                value={dateIndex}
+                onChange={(e) => setDateIndex(Number(e.target.value))}
+                className="w-full range range-primary"
+              />
+            </div>
+          )}
+
+          {/* Filters + Apply button together */}
+          <div className="flex flex-wrap items-end gap-3">
+            <FilterPanel
+              counties={counties}
+              years={years}
+              selectedCounty={selectedCounty}
+              setSelectedCounty={setSelectedCounty}
+              selectedYear={selectedYear}
+              setSelectedYear={setSelectedYear}
+            />
+
+            <button
+              className="btn btn-primary mt-2"
+              onClick={applyFilters}
+              disabled={loading}
+            >
+              Apply Filters
+            </button>
+          </div>
         </div>
       </div>
 
-      {/* RIGHT: controls + info */}
+      {/* RIGHT: Predict + Info */}
       <div className="w-full md:w-1/3 p-4 bg-base-200 overflow-auto flex flex-col">
         <div className="mb-4">
-          <h2 className="text-lg font-semibold">Predict NDVI</h2>
+          <h2 className="text-lg font-semibold mb-2">Predict NDVI</h2>
           <PredictForm
             defaultCounty={selectedCounty}
             onResult={(pred) => setPrediction(pred)}

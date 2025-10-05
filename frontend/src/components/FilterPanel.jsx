@@ -8,58 +8,49 @@ export default function FilterPanel({
   setSelectedCounty,
   selectedYear,
   setSelectedYear,
-  dates,
-  dateIndex,
-  setDateIndex,
 }) {
   return (
-    <div className="space-y-3">
-      <div>
-        <label className="block text-sm font-medium">County</label>
+    <div className="flex flex-wrap gap-3 items-end">
+      {/* County Selector */}
+      <div className="flex flex-col">
+        <label className="text-sm font-semibold mb-1">County</label>
         <select
-          value={selectedCounty}
+          value={selectedCounty || ""}
           onChange={(e) => setSelectedCounty(e.target.value)}
-          className="select select-bordered w-full"
+          className="select select-bordered w-40"
         >
-          <option value="">All counties</option>
-          {counties.map((c) => (
-            <option key={c} value={c}>
-              {c}
-            </option>
-          ))}
+          <option value="">All</option>
+          {counties.length > 0 ? (
+            counties.map((county) => (
+              <option key={county} value={county}>
+                {county}
+              </option>
+            ))
+          ) : (
+            <option disabled>Loading...</option>
+          )}
         </select>
       </div>
 
-      <div>
-        <label className="block text-sm font-medium">Year</label>
+      {/* Year Selector */}
+      <div className="flex flex-col">
+        <label className="text-sm font-semibold mb-1">Year</label>
         <select
-          value={selectedYear}
+          value={selectedYear || ""}
           onChange={(e) => setSelectedYear(e.target.value)}
-          className="select select-bordered w-full"
+          className="select select-bordered w-32"
         >
-          {years.map((y) => (
-            <option key={y} value={y}>
-              {y}
-            </option>
-          ))}
+          <option value="">All</option>
+          {years.length > 0 ? (
+            years.map((year) => (
+              <option key={year} value={year}>
+                {year}
+              </option>
+            ))
+          ) : (
+            <option disabled>Loading...</option>
+          )}
         </select>
-      </div>
-
-      <div>
-        <label className="block text-sm font-medium">Time slider</label>
-        <input
-          type="range"
-          min="0"
-          max={Math.max(0, dates.length - 1)}
-          value={dateIndex}
-          onChange={(e) => setDateIndex(parseInt(e.target.value, 10))}
-          className="range range-primary w-full"
-        />
-        <div className="text-xs mt-1">
-          {dates.length
-            ? new Date(dates[dateIndex]).toLocaleDateString()
-            : "No dates"}
-        </div>
       </div>
     </div>
   );
