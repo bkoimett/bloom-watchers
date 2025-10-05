@@ -12,7 +12,7 @@ app.use(express.json());
 // Connect DB
 const MONGO = process.env.MONGODB_URI || "mongodb://localhost:27017/bloomdb";
 mongoose
-  .connect(MONGO, { useNewUrlParser: true, useUnifiedTopology: true })
+  .connect(MONGO)
   .then(() => console.log("✅ MongoDB connected"))
   .catch((err) => console.error("MongoDB error", err));
 

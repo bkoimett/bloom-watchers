@@ -1,37 +1,23 @@
-// backend/routes/predict.js
 const express = require("express");
 const axios = require("axios");
-const path = require("path");
-const fs = require("fs");
-
 const router = express.Router();
+const PYTHON_API = process.env.PYTHON_API_URL;
 
-router.get("/", async (req, res) => {
-  const { county = "All", months = 6 } = req.query;
-  const pythonUrl = process.env.PYTHON_URL || "http://localhost:8000/predict";
+// POST /api/predict
+router.post("/", async (req, res) => {
+  const { city, date } = req.body;
+
+  if (!city || !date) {
+    return res.status(400).json({ error: "city and date are required" });
+  }
 
   try {
-    // try python microservice
-    const response = await axios.get(pythonUrl, {
-      params: { county, months },
-      timeout: 5000,
-    });
-    return res.json(response.data);
+    // forward request to Python FastAPI endpoint
+    const response = await axios.post(`${PYTHON_API}/predict`, { city, date });
+    res.json(response.data);
   } catch (err) {
-    console.warn(
-      "Python service unreachable, returning mock predictions:",
-      err.message
-    );
-
-    // fallback to local mock_predictions.json
-    const file = path.join(__dirname, "..", "data", "mock_predictions.json");
-    if (fs.existsSync(file)) {
-      const raw = fs.readFileSync(file);
-      const json = JSON.parse(raw);
-      const preds = json[county] || json["default"] || [];
-      return res.json(preds);
-    }
-    return res.status(502).json({ error: "Prediction service unavailable" });
+    console.error("Prediction fetch error:", err.message);
+    res.status(500).json({ error: "Failed to fetch prediction" });
   }
 });
 

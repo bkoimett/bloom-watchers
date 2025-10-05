@@ -1,23 +1,12 @@
-// frontend/src/services/api.js
-const API = "/api";
+const BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:3000/api";
 
-export async function fetchBlooms() {
-  const r = await fetch(`${API}/blooms`);
-  return r.json();
-}
+export async function fetchPrediction(city, date) {
+  const res = await fetch(`${BASE_URL}/predict`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ city, date }),
+  });
 
-export async function filterBlooms(county, year) {
-  const params = new URLSearchParams();
-  if (county) params.append("county", county);
-  if (year) params.append("year", year);
-  const r = await fetch(`${API}/blooms?${params.toString()}`);
-  return r.json();
-}
-
-export async function predictCounty(county, months = 6) {
-  const params = new URLSearchParams();
-  if (county) params.append("county", county);
-  params.append("months", months);
-  const r = await fetch(`${API}/predict?${params.toString()}`);
-  return r.json();
+  if (!res.ok) throw new Error("Failed to fetch prediction");
+  return res.json();
 }

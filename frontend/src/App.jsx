@@ -4,6 +4,7 @@ import KenyaMap from "./components/KenyaMap";
 import FilterPanel from "./components/FilterPanel";
 import InfoPanel from "./components/InfoPanel";
 import { fetchBlooms, filterBlooms, predictCounty } from "./services/api";
+import PredictForm from "./components/PredictForm";
 
 export default function App() {
   const [allData, setAllData] = useState([]);
@@ -138,6 +139,10 @@ export default function App() {
           <h2 className="text-lg font-semibold mb-2">Bloom Insights</h2>
           <InfoPanel records={visibleRecords} predictions={predictions} />
         </div>
+
+        <PredictForm/>
+
+
       </div>
     </div>
   );
