@@ -1,4 +1,4 @@
-const API = process.env.REACT_APP_API_URL || "/api"; // Vite dev proxy already set to backend
+const API = import.meta.env.VITE_API_URL || "/api";
 
 export async function fetchBlooms() {
   const r = await fetch(`${API}/blooms`);
