@@ -34,48 +34,49 @@ async function predictCounty(county) {
   return r.json();
 }
 
-// ====== HELPERS ======
+// ====== HELPER FUNCTIONS ======
 const ndviToColor = (v) =>
   v >= 0.6 ? "#16a34a" : v >= 0.4 ? "#f59e0b" : "#dc2626";
+
 const ndviToRadius = (v) => 4 + Math.max(0, Math.min(1, v)) * 14;
 
 // ====== MAP COMPONENT ======
 function KenyaMap({ data, predictions, showAnomalies }) {
   return (
-    <div className="relative w-full h-full">
+    <div className="relative w-full h-[60vh] md:h-full z-0">
       <MapContainer
         center={[-0.0236, 37.9062]}
         zoom={6}
-        className="h-full w-full z-0"
+        className="h-full w-full rounded-lg overflow-hidden z-0"
       >
         <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
 
-        {data.map(
-          (d, i) =>
-            d.lat &&
-            d.lon && (
-              <CircleMarker
-                key={i}
-                center={[d.lat, d.lon]}
-                radius={ndviToRadius(d.ndvi)}
-                pathOptions={{
-                  color: ndviToColor(d.ndvi),
-                  fillOpacity: 0.6,
-                }}
-              >
-                <Tooltip>
-                  <div>
-                    <b>{d.county}</b> <br />
-                    {new Date(d.date).toLocaleDateString()} <br />
-                    NDVI: {d.ndvi.toFixed(2)} <br />
-                    Rainfall: {d.rainfall ?? "—"} <br />
-                    Anomaly: {d.anomaly ?? "None"}
-                  </div>
-                </Tooltip>
-              </CircleMarker>
-            )
+        {/* Bloom Markers */}
+        {data.map((d, i) =>
+          d.lat && d.lon ? (
+            <CircleMarker
+              key={i}
+              center={[d.lat, d.lon]}
+              radius={ndviToRadius(d.ndvi)}
+              pathOptions={{
+                color: ndviToColor(d.ndvi),
+                fillOpacity: 0.6,
+              }}
+            >
+              <Tooltip>
+                <div>
+                  <b>{d.county}</b> <br />
+                  {new Date(d.date).toLocaleDateString()} <br />
+                  NDVI: {d.ndvi.toFixed(2)} <br />
+                  Rainfall: {d.rainfall ?? "—"} <br />
+                  Anomaly: {d.anomaly ?? "None"}
+                </div>
+              </Tooltip>
+            </CircleMarker>
+          ) : null
         )}
 
+        {/* Prediction Marker */}
         {predictions?.latitude && predictions?.longitude && (
           <CircleMarker
             center={[predictions.latitude, predictions.longitude]}
@@ -100,8 +101,8 @@ function KenyaMap({ data, predictions, showAnomalies }) {
       </MapContainer>
 
       {/* LEGEND */}
-      <div className="absolute bottom-4 right-4 bg-white p-3 rounded-lg shadow-md text-xs z-50">
-        <div className="font-semibold mb-2">NDVI Legend</div>
+      <div className="absolute bottom-3 right-3 bg-white/90 p-3 rounded-lg shadow-md text-xs z-[1000] text-gray-800">
+        <div className="font-semibold mb-1">NDVI Legend</div>
         <div className="flex items-center gap-2 mb-1">
           <div className="w-4 h-4 rounded bg-green-600"></div>
           Healthy ≥ 0.6
@@ -129,7 +130,6 @@ export default function App() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // Load data
   useEffect(() => {
     (async () => {
       try {
@@ -179,39 +179,19 @@ export default function App() {
         </p>
       </header>
 
-      {/* MAIN CONTENT */}
-      <div className="flex flex-1 overflow-hidden">
+      {/* MAIN CONTENT AREA */}
+      <div className="flex flex-col md:flex-row flex-1 overflow-hidden">
         {/* LEFT: MAP */}
-        <div className="relative flex-1">
+        <div className="relative flex-1 min-h-[60vh]">
           <KenyaMap
             data={data}
             predictions={predictions}
             showAnomalies={showAnomalies}
           />
-
-          {/* FLOATING BUTTONS */}
-          <div className="absolute top-4 left-4 z-50 flex flex-col gap-3 bg-white/90 p-3 rounded-xl shadow-md border border-gray-200">
-            <button
-              onClick={handleFilter}
-              disabled={loading}
-              className="btn btn-accent w-full"
-            >
-              🔍 Apply Filters
-            </button>
-            <button
-              onClick={handlePredict}
-              disabled={loading}
-              className={`btn btn-primary w-full ${
-                !county ? "opacity-70 cursor-not-allowed" : ""
-              }`}
-            >
-              🔮 Predict
-            </button>
-          </div>
         </div>
 
         {/* RIGHT: CONTROL PANEL */}
-        <aside className="w-80 bg-white border-l p-4 overflow-y-auto">
+        <aside className="w-full md:w-80 bg-white border-t md:border-t-0 md:border-l p-4 overflow-y-auto relative z-[2000]">
           <h2 className="text-lg font-bold mb-3">Filters</h2>
 
           <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -251,6 +231,24 @@ export default function App() {
             <span className="text-sm">Show anomalies</span>
           </label>
 
+          {/* ACTION BUTTONS */}
+          <div className="flex flex-col gap-3 my-4">
+            <button
+              onClick={handleFilter}
+              disabled={loading}
+              className="btn btn-accent w-full"
+            >
+              🔍 Apply Filters
+            </button>
+            <button
+              onClick={handlePredict}
+              disabled={loading || !county}
+              className="btn btn-primary w-full"
+            >
+              🔮 Predict
+            </button>
+          </div>
+
           {error && (
             <div className="alert alert-error text-xs mt-2">{error}</div>
           )}
@@ -259,7 +257,6 @@ export default function App() {
           <div className="text-sm text-gray-500">
             Records loaded: {data.length}
           </div>
-
           {predictions && (
             <div className="mt-4 text-sm">
               <b>Predicted NDVI:</b> {predictions.predicted_ndvi.toFixed(3)}
