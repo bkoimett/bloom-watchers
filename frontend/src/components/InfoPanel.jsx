@@ -56,19 +56,30 @@ export default function InfoPanel({
       )}
 
       {/* --- Average NDVI and Anomalies --- */}
-      <div className="card bg-base-100 p-3 mb-3">
-        <div className="flex justify-between">
-          <div>
-            <div className="text-sm text-gray-600">Average NDVI</div>
-            <div className="text-2xl font-bold">{stats.avg.toFixed(2)}</div>
+      {/* --- Anomalies --- */}
+      <div>
+        <h3 className="font-semibold mb-2">Anomalies</h3>
+        {records.filter((r) => !!r.anomaly).length ? (
+          records
+            .filter((r) => !!r.anomaly)
+            .map((a, i) => (
+              <div
+                key={i}
+                className="card bg-red-100 border border-red-300 text-red-900 p-2 mb-2"
+              >
+                <div>
+                  <b>{a.county}</b> — {new Date(a.date).toLocaleDateString()}
+                </div>
+                <div className="text-sm">
+                  Type: {a.anomaly || "Anomaly"} · NDVI: {a.ndvi?.toFixed(2)}
+                </div>
+              </div>
+            ))
+        ) : (
+          <div className="text-sm text-gray-500">
+            No anomalies for selection
           </div>
-          <div>
-            <div className="text-sm text-gray-600">Anomalous regions</div>
-            <div className="text-2xl font-bold text-error">
-              {stats.anomalies}
-            </div>
-          </div>
-        </div>
+        )}
       </div>
 
       {/* --- NDVI Trend Chart --- */}

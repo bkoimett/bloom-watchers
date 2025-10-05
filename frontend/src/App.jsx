@@ -53,27 +53,33 @@ export default function App() {
   );
 
   // apply filters (calls backend filter route)
-  const applyFilters = async () => {
-    try {
-      setLoading(true);
-      const res = await filterBlooms(selectedCounty, selectedYear);
-      const normalized = (res || []).map((d) => ({
-        ...d,
-        date: new Date(d.date).toISOString().slice(0, 10),
-      }));
-      setDisplayData(normalized);
-      const uniqueDates = Array.from(
-        new Set(normalized.map((d) => d.date))
-      ).sort((a, b) => new Date(a) - new Date(b));
-      setDates(uniqueDates);
-      setDateIndex(0);
-    } catch (err) {
-      console.error(err);
-      setError(err.message || "Filter failed");
-    } finally {
-      setLoading(false);
-    }
-  };
+const applyFilters = async () => {
+  try {
+    setLoading(true);
+    const res = await filterBlooms(selectedCounty, selectedYear);
+
+    const normalized = res.map((d) => ({
+      ...d,
+      date: new Date(d.date).toISOString().slice(0, 10),
+      anomaly: d.anomaly ? true : false, // ensure boolean
+    }));
+
+    setDisplayData(normalized);
+
+    // Update slider dates
+    const uniqueDates = Array.from(new Set(normalized.map((d) => d.date))).sort(
+      (a, b) => new Date(a) - new Date(b)
+    );
+
+    setDates(uniqueDates);
+    setDateIndex(uniqueDates.length - 1); // last date (most recent)
+  } catch (err) {
+    console.error("❌ Filter failed:", err);
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   // Predict using backend -> python
   const handlePredict = async (
@@ -119,13 +125,7 @@ export default function App() {
             >
               Apply filters
             </button>
-            <button
-              className="btn btn-secondary"
-              onClick={() => handlePredict()}
-              disabled={loading || !selectedCounty}
-            >
-              🔮 Predict
-            </button>
+
           </div>
         </div>
 
